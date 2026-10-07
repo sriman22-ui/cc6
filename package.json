@@ -1,0 +1,18 @@
+{
+  "name": "solar-journey-3d",
+  "version": "1.0.0",
+  "description": "Journey of a Solar Panel - interactive Three.js concept for the NTU CC0006 showcase",
+  "main": "index.js",
+  "scripts": {
+    "start": "python3 -m http.server 8765",
+    "stills": "node shoot2.mjs out stills",
+    "clip": "node shoot2.mjs out clip"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "playwright": "^1.63.0",
+    "three": "^0.160.0"
+  }
+}
