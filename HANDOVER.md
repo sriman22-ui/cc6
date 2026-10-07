@@ -11,7 +11,7 @@ mouse / trackpad drag to orbit, scroll to zoom, click to explore.
 - shoot2.mjs – Playwright script that renders stills / tour frames (still works)
 - comp3.py – builds the photo-vs-3D comparison images (Pillow)
 - reference-photos/ – EEE building, NTU rooftop solar, Campus Loop bus stop, campus bus
-- assets/ntu-logo.png – NTU logo (trimmed), used on the building fascia and the bus
+- assets/ntu-logo.png – NTU logo (trimmed), used on the bus
 
 ## Run locally
     npm install            # three + playwright
@@ -35,7 +35,7 @@ If views.json cannot be loaded the page falls back to an inline copy of the view
 - Camera views + which view each stop uses: search "STOP_VIEW"
 - EEE building: search "EEE building"
 - Biosolar roof: search "biosolar roof" (bio group; animated arrows in evapArrows)
-- NTU logo panels: search "logoPanel"
+- NTU logo panel on the bus: search "logoPanel"
 - Bus stop: search "Campus Loop bus stop" (stopProp group)
 - Bus: search "Campus Loop bus" (busX() is the timing profile; BUS_V = cruise speed, BUS_WAIT = dwell at the shelter)
 - Info-card text: CARDS; tour labels: steps; hotspot positions: HS
