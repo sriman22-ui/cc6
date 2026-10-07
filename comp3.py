@@ -1,6 +1,5 @@
 from PIL import Image, ImageDraw, ImageFont
 import sys
-U='/root/.claude/uploads/511bf60c-43a8-55f1-8467-0b6e81915404/'
 F=lambda s,b=True: ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans%s.ttf'%('-Bold' if b else ''),s)
 PW,PH,G=600,400,24
 def fit(img,box=None):
@@ -22,13 +21,12 @@ def make(title,panels,out):
         if i<len(panels)-1: d.text((x+PW+3,y+PH//2-18),'›',font=F(34),fill='#8a96a3')
     d.text((G,64),'Concept mockup — not to scale',font=F(15,False),fill='#6b7785')
     c.save(out)
-make('EEE building: today vs half-converted roof',[
- (U+'65fb0ccc-image.png',(560,0,1340,500),'Photo · today','#5b6670'),
- ('s3/c_eee.png',(100,0,1180,720),'3D · hot roof | biosolar roof','#2e8b57')],'s3/compare_eee.png')
-make('Rooftop solar: hot roof vs biosolar roof',[
- (U+'3af73566-image.png',None,'Photo · NTU rooftop today','#5b6670'),
- ('s3/c_roof.png',(100,0,1180,720),'3D · hot roof (left) | biosolar (right)','#2e8b57')],'s3/compare_roof.png')
+make('EEE building: today vs biosolar roof',[
+ ('reference-photos/eee-building.webp',(560,0,1340,500),'Photo · today','#5b6670'),
+ ('s3/c_eee.png',(100,0,1180,720),'3D · biosolar roof','#2e8b57')],'s3/compare_eee.png')
+make('Rooftop solar: today vs biosolar roof',[
+ ('reference-photos/ntu-rooftop-solar.webp',None,'Photo · NTU rooftop today','#5b6670'),
+ ('s3/c_roof.png',(100,0,1180,720),'3D · biosolar roof','#2e8b57')],'s3/compare_roof.png')
 make('Campus Loop bus stop: today vs Solar Cool Stop',[
- (U+'28a14ea3-image.png',(0,150,335,500),'Photo · today','#5b6670'),
- ('s3/c_stop_today.png',(100,0,1180,720),'3D · today','#c8553d'),
- ('s3/c_stop_prop.png',(100,0,1180,720),'3D · Solar Cool Stop','#2e8b57')],'s3/compare_busstop.png')
+ ('reference-photos/campus-loop-bus-stop.png',(0,150,335,500),'Photo · today','#5b6670'),
+ ('s3/c_stop.png',(100,0,1180,720),'3D · Solar Cool Stop','#2e8b57')],'s3/compare_busstop.png')

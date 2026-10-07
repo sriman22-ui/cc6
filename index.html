@@ -14,12 +14,6 @@
   #title b{font-size:20px;color:#173a5e;display:block}
   #title span{font-size:13px;color:#4a6175}
   #title small{display:block;margin-top:6px;font-size:11.5px;color:#7a8a99}
-  #toggle{top:18px;right:22px;display:flex;align-items:center;background:#fff;border-radius:22px;box-shadow:0 2px 10px rgba(0,0,0,.12);overflow:hidden}
-  #toggle .lab{color:#173a5e;padding:9px 4px 9px 15px;font-size:13px;font-weight:600}
-  #toggle button{border:0;background:#f1f4f7;padding:9px 15px;font-size:13px;font-weight:600;color:#555;cursor:pointer;transition:background .25s,color .25s}
-  #toggle button:hover{background:#e3e9ef}
-  #toggle button.today{background:#c8553d;color:#fff}
-  #toggle button.proposal{background:#2e8b57;color:#fff}
   #tour{bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.95);padding:8px;border-radius:30px;box-shadow:0 2px 12px rgba(0,0,0,.15);white-space:nowrap}
   #tour .step{position:relative;overflow:hidden;display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:20px;font-size:13px;color:#445;font-weight:600;cursor:pointer;transition:background .2s,color .2s}
   #tour .step:hover{background:#e8eef4}
@@ -37,7 +31,6 @@
   #card .body{font-size:13.5px;line-height:1.45;color:#333}
   #card ul{margin:6px 0 4px 0;padding-left:18px;font-size:13px;line-height:1.5}
   #card .tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;background:#eef3f0;margin-bottom:4px}
-  #card .hint{margin-top:10px;padding-top:8px;border-top:1px solid #e6ebf0;font-size:12px;color:#6b7785}
   .pin{position:absolute;z-index:4;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:#f2b632;color:#173a5e;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;transition:transform .15s,background .2s,color .2s}
   .pin:hover{transform:scale(1.18)}
   .pin.act{background:#173a5e;color:#fff;transform:scale(1.25)}
@@ -53,7 +46,6 @@
 </head><body>
 <div id="c"></div>
 <div id="title" class="ui"><b>Journey of a Solar Panel</b><span>Biosolar roofs + Solar Cool Stops · NTU campus concept</span><small>Drag to orbit · scroll to zoom · click a numbered pin</small></div>
-<div id="toggle" class="ui"><div class="lab">Bus stop:</div><button id="tToday">Today</button><button id="tProp">Solar Cool Stop</button></div>
 <div id="card" class="ui"></div>
 <button id="start" class="ui">▶ Start the guided tour</button>
 <button id="reset" class="ui" title="Back to the overview (Esc)">⟲ Reset view</button>
@@ -77,12 +69,16 @@ sunL.shadow.bias=-0.0005;scene.add(sunL);
 
 // ---------- camera views (views.json is the source of truth; inline copy is only a fallback for file:// opens) ----------
 let VIEWS={stills:{
- "01_overview":{p:[-6,44,70],t:[-5,4,0]},"03_hot_roof":{p:[-40,32,24],t:[-30,13.6,-2]},"04_biosolar_roof":{p:[-20,36,27],t:[-19,13.6,-2]},
- "05_cutaway":{p:[0,23,25],t:[-10,15,3]},"07_solar_coolstop":{p:[40,7.5,25],t:[29.5,2.2,9.5]}}};
+ "01_overview":{p:[-6,44,70],t:[-5,4,0]},"03_biosolar_roof":{p:[-22,30,24],t:[-22,13.6,-2]},"04_solar_coolstop":{p:[40,7.5,25],t:[29.5,2.2,9.5]}}};
 try{const r=await fetch('./views.json');if(r.ok)VIEWS=await r.json();}catch(e){console.warn('views.json not loaded, using inline views',e);}
-const STOP_VIEW={0:'01_overview',1:'03_hot_roof',2:'04_biosolar_roof',3:'05_cutaway',4:'07_solar_coolstop'};
+const STOP_VIEW={0:'01_overview',1:'03_biosolar_roof',2:'04_solar_coolstop'};
+const NSTOPS=2;
 const viewFor=n=>VIEWS.stills[STOP_VIEW[n]];
 
+// ---------- NTU logo (assets/ntu-logo.png) ----------
+let logoTex=null;
+try{logoTex=await new THREE.TextureLoader().loadAsync('./assets/ntu-logo.png');logoTex.colorSpace=THREE.SRGBColorSpace;logoTex.anisotropy=8;}
+catch(e){console.warn('NTU logo not loaded',e);}
 const M=(c,o={})=>new THREE.MeshStandardMaterial({color:c,roughness:.85,flatShading:true,...o});
 function add(m,parent=scene){m.castShadow=m.receiveShadow=true;parent.add(m);return m;}
 function box(w,h,d,c,x,y,z,o,parent){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),M(c,o));m.position.set(x,y,z);return add(m,parent);}
@@ -93,9 +89,13 @@ function textPlane(txt,w,h,{color='#1f2f6b',bg=null,font='bold 64px Arial',align
   g.fillText(txt,align==='center'?c.width/2:8,c.height/2);
   const t=new THREE.CanvasTexture(c);t.anisotropy=8;t.colorSpace=THREE.SRGBColorSpace;
   return new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t,transparent:!bg}));}
+// white panel with the NTU logo on its front face (h is the panel height; the logo keeps its 2.55:1 aspect)
+function logoPanel(h,depth=.25){const w=h*2.55+.3,g=new THREE.Group();
+  const p=new THREE.Mesh(new THREE.BoxGeometry(w,h,depth),new THREE.MeshBasicMaterial({color:'#ffffff'}));p.castShadow=true;g.add(p);
+  const l=logoTex?new THREE.Mesh(new THREE.PlaneGeometry(w-.3,h-.3),new THREE.MeshBasicMaterial({map:logoTex})):textPlane('NTU',w-.3,h-.3,{color:'#1f3f8f',font:'bold 160px Arial',align:'center'});
+  l.position.z=depth/2+.005;g.add(l);return g;}
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const easeInOutCubic=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
-const easeOutBack=t=>1+2.70158*Math.pow(t-1,3)+1.70158*Math.pow(t-1,2);
 
 // ---------- ground, road, footpath ----------
 box(120,1.2,56,'#93bf7f',5,-0.6,-2);
@@ -130,10 +130,11 @@ for(let f=0;f<B.floors;f++){const y=f*B.fh;
    box(bl-.6,1.5,.1,'#5d5144',bx,y+1.7,B.z1+.06);                      // ribbon window (bronze glass)
    for(let k=0;k<20;k++) box(.08,1.5,.12,'#d9d3c6',B.x0+1+k*2,y+1.7,B.z1+.08);}
 }
-// top floor fascia with recessed window boxes (as in photo)
+// top floor fascia with recessed window boxes (as in photo); the last two bays carry the NTU logo panel
 const ty=(B.floors-1)*B.fh;
 box(bl+.4,2.8,1.4,'#eee8dc',bx,ty+1.9,B.z1+.7);
-for(let k=0;k<13;k++){const x=B.x0+3+k*3;box(2.4,1.3,.25,'#6b5844',x,ty+1.9,B.z1+1.3);box(2.6,.12,.3,'#d0c9bb',x,ty+2.62,B.z1+1.32);}
+for(let k=0;k<11;k++){const x=B.x0+3+k*3;box(2.4,1.3,.25,'#6b5844',x,ty+1.9,B.z1+1.3);box(2.6,.12,.3,'#d0c9bb',x,ty+2.62,B.z1+1.32);}
+{const lp=logoPanel(2.0,.25);lp.position.set(-7.2,ty+1.9,B.z1+1.3);scene.add(lp);}
 // sign
 {const s=textPlane('Electrical & Electronic Engineering',13,.9,{color:'#25327a',font:'bold 70px Arial'});s.position.set(B.x0+8.3,ty+3.0,B.z1+1.42);scene.add(s);}
 // antenna mast
@@ -142,13 +143,11 @@ for(let k=0;k<13;k++){const x=B.x0+3+k*3;box(2.4,1.3,.25,'#6b5844',x,ty+1.9,B.z1
 const RY=bh;
 box(bl,.7,.35,'#e2dbcd',bx,RY+.35,B.z0+.18);box(bl,.7,.35,'#e2dbcd',bx,RY+.35,B.z1-.18);
 box(.35,.7,bd,'#e2dbcd',B.x1-.18,RY+.35,(B.z0+B.z1)/2);
-box(.4,.9,bd,'#d6cfc0',-24,RY+.45,(B.z0+B.z1)/2); // divider between halves
 hedge(-24,6.9,bl-2,1,1.1);
 
-// roof halves: each has a 'conv' and 'bio' version (the roof is permanently split: left = conv[0], right = bio[1])
-const halves=[{x0:-43.6,x1:-24.3},{x0:-23.7,x1:-4.4}];
-const conv=[new THREE.Group(),new THREE.Group()],bio=[new THREE.Group(),new THREE.Group()];
-conv.forEach(g=>scene.add(g));bio.forEach(g=>scene.add(g));
+// ---------- biosolar roof (the whole roof) ----------
+const roof={x0:-43.6,x1:-4.4},rw=roof.x1-roof.x0,rcx=(roof.x0+roof.x1)/2,rdz=bd-.8;
+const bio=new THREE.Group();scene.add(bio);
 function moduleArray(parent,x,y,z,cols=4,rows=2,tilt=.2,mw=1.6,md=1.05){
   const g=new THREE.Group();
   for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
@@ -157,46 +156,31 @@ function moduleArray(parent,x,y,z,cols=4,rows=2,tilt=.2,mw=1.6,md=1.05){
   const fr=new THREE.Mesh(new THREE.BoxGeometry(cols*mw+.1,.06,rows*md+.1),M('#c3cad1'));fr.position.y=-.07;g.add(fr);
   g.rotation.x=-tilt;g.position.set(x,y,z);parent.add(g);return g;}
 function legs(parent,x,y0,y1,z,w=6.2,d=2){[[-w/2,-d/2],[w/2,-d/2],[-w/2,d/2],[w/2,d/2],[0,-d/2],[0,d/2]].forEach(([dx,dz])=>{const h=y1-y0+(dz<0?.35:0);const m=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,h,5),M('#7f878e'));m.position.set(x+dx,y0+h/2,z+dz);parent.add(m);});}
-const heatMat=new THREE.MeshBasicMaterial({color:'#ff5a36',transparent:true,opacity:.2,depthWrite:false});
-// animated arrows: heat (red, rising from the hot roof) and evapotranspiration (blue, wavy, from the plants)
-const heatArrows=[],evapArrows=[];
-function arrowUp(parent,x,y,z,len,color){const mat=new THREE.MeshBasicMaterial({color,transparent:true});const g=new THREE.Group();
-  const sh=new THREE.Mesh(new THREE.CylinderGeometry(.13,.13,len,6),mat);sh.position.y=len/2;const hd=new THREE.Mesh(new THREE.ConeGeometry(.38,.85,8),mat);hd.position.y=len+.42;
-  g.add(sh,hd);g.position.set(x,y,z);parent.add(g);heatArrows.push({g,mat,y0:y,ph:Math.random()});return g;}
+// animated evapotranspiration arrows (blue, wavy, rising from the plants)
+const evapArrows=[];
 function wavy(parent,x,y,z){const pts=[];for(let i=0;i<=20;i++){const t=i/20;pts.push(new THREE.Vector3(Math.sin(t*Math.PI*3)*.25,t*1.6,0));}
   const mat=new THREE.MeshBasicMaterial({color:'#2f8fd8',transparent:true});const g=new THREE.Group();g.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),30,.07,5),mat));
   const hd=new THREE.Mesh(new THREE.ConeGeometry(.2,.45,6),mat);hd.position.y=1.75;g.add(hd);g.position.set(x,y,z);parent.add(g);evapArrows.push({g,mat,x0:x,y0:y,ph:Math.random()});return g;}
-const rowsZ=[-6.2,-2,2.2];
-halves.forEach((h,i)=>{const cx=(h.x0+h.x1)/2,w=h.x1-h.x0,dz=bd-.8;
-  // --- conventional (today) ---
-  const g=conv[i];
-  {const s=new THREE.Mesh(new THREE.BoxGeometry(w,.18,dz),M('#a19f99'));s.position.set(cx,RY+.09,-2);s.receiveShadow=true;g.add(s);}
-  rowsZ.forEach(z=>[-4.7,4.7].forEach(dx=>{legs(g,cx+dx,RY+.18,RY+.6,z,8.4,2.8);moduleArray(g,cx+dx,RY+.8,z,5,3,.2,1.7,1.0);}));
-  {const hz=new THREE.Mesh(new THREE.BoxGeometry(w-.4,2.4,dz-.4),heatMat);hz.position.set(cx,RY+1.4,-2);g.add(hz);}
-  [[-6,-4],[-1,0],[4,-6],[6,1],[-3,3.8],[2,4]].forEach(([dx,z])=>arrowUp(g,cx+dx,RY+2.3,z,2.6,'#e8452c'));
-  // --- biosolar (proposal) ---
-  const b=bio[i];let ly=RY;
-  [['#6f6f6f',.22],['#222831',.1],['#3f6fa8',.1],['#7b5b3a',.5]].forEach(([c,t])=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,t,dz),M(c));m.position.set(cx,ly+t/2,-2);m.receiveShadow=true;b.add(m);ly+=t;});
-  const top=ly;
-  const leaf=['#5bb04f','#4a9c45','#79c25d','#3f8f3e'];
+// build-up: slab, root barrier + waterproofing, drainage, growing medium
+let ly=RY;[['#6f6f6f',.22],['#222831',.1],['#3f6fa8',.1],['#7b5b3a',.5]].forEach(([c,t])=>{const m=new THREE.Mesh(new THREE.BoxGeometry(rw,t,rdz),M(c));m.position.set(rcx,ly+t/2,-2);m.receiveShadow=true;bio.add(m);ly+=t;});
+const top=ly;
+const rowsZ=[-6.2,-2,2.2],leaf=['#5bb04f','#4a9c45','#79c25d','#3f8f3e'];
+// two bays of panel arrays, each with a maintenance walkway down its middle
+[{x0:-43.6,x1:-24.3},{x0:-23.7,x1:-4.4}].forEach(h=>{const cx=(h.x0+h.x1)/2,w=h.x1-h.x0;
   for(let k=0;k<330;k++){const x=h.x0+.5+Math.random()*(w-1),z=-8.2+Math.random()*12.4;if(Math.abs(x-cx)<.75)continue;
-    const p=new THREE.Mesh(new THREE.IcosahedronGeometry(.27+Math.random()*.22,0),M(leaf[k%4]));p.position.set(x,top+.2,z);p.scale.y=.7;p.castShadow=true;b.add(p);}
-  for(let k=0;k<36;k++){const p=new THREE.Mesh(new THREE.IcosahedronGeometry(.12,0),M(k%2?'#f2d04b':'#e98bb5'));p.position.set(h.x0+.6+Math.random()*(w-1.2),top+.45,-8+Math.random()*12);b.add(p);}
-  {const m=new THREE.Mesh(new THREE.BoxGeometry(1.4,.12,dz-.4),M('#d9d9d4'));m.position.set(cx,top+.06,-2);b.add(m);} // maintenance walkway
-  rowsZ.forEach(z=>[-4.7,4.7].forEach(dx=>{legs(b,cx+dx,top,top+1.9,z,8.4,2.8);moduleArray(b,cx+dx,top+2.05,z,5,3,.2,1.7,1.0);}));
-  [[-7,-4.1],[-2.5,-4.1],[2.5,-.1],[7,-.1],[-6,.1],[3,4.2],[-3,4.2],[6.5,-4]].forEach(([dx,z])=>wavy(b,cx+dx,top+.3,z));
+    const p=new THREE.Mesh(new THREE.IcosahedronGeometry(.27+Math.random()*.22,0),M(leaf[k%4]));p.position.set(x,top+.2,z);p.scale.y=.7;p.castShadow=true;bio.add(p);}
+  for(let k=0;k<36;k++){const p=new THREE.Mesh(new THREE.IcosahedronGeometry(.12,0),M(k%2?'#f2d04b':'#e98bb5'));p.position.set(h.x0+.6+Math.random()*(w-1.2),top+.45,-8+Math.random()*12);bio.add(p);}
+  {const m=new THREE.Mesh(new THREE.BoxGeometry(1.4,.12,rdz-.4),M('#d9d9d4'));m.position.set(cx,top+.06,-2);bio.add(m);} // maintenance walkway
+  rowsZ.forEach(z=>[-4.7,4.7].forEach(dx=>{legs(bio,cx+dx,top,top+1.9,z,8.4,2.8);moduleArray(bio,cx+dx,top+2.05,z,5,3,.2,1.7,1.0);}));
+  [[-7,-4.1],[-2.5,-4.1],[2.5,-.1],[7,-.1],[-6,.1],[3,4.2],[-3,4.2],[6.5,-4]].forEach(([dx,z])=>wavy(bio,cx+dx,top+.3,z));
 });
-{const a=textPlane('HOT ROOF (today)',7,.7,{bg:'#c8553d',color:'#fff',font:'bold 120px Arial',align:'center'});a.position.set(-34,RY+.75,B.z1+.02);scene.add(a);
- const b=textPlane('BIOSOLAR ROOF (proposal)',9,.7,{bg:'#2e8b57',color:'#fff',font:'bold 120px Arial',align:'center'});b.position.set(-17,RY+.75,B.z1+.02);scene.add(b);}
-// exploded cutaway (right half front)
-const cut=new THREE.Group();scene.add(cut);
-{let ey=RY+1.2;[['#6f6f6f',.25],['#222831',.12],['#3f6fa8',.12],['#7b5b3a',.5],['#5aa84f',.35]].forEach(([c,t],i)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(4.2,t,1.4),M(c));m.position.set(-9,ey+t/2,B.z1+3.1);m.castShadow=true;cut.add(m);ey+=t+.38;});}
+{const b=textPlane('BIOSOLAR ROOF (proposal)',9,.7,{bg:'#2e8b57',color:'#fff',font:'bold 120px Arial',align:'center'});b.position.set(rcx,RY+.75,B.z1+.02);scene.add(b);}
 
 // sun
 {const s=new THREE.Mesh(new THREE.IcosahedronGeometry(2.2,2),new THREE.MeshBasicMaterial({color:'#ffcc33'}));s.position.set(-46,30,-18);scene.add(s);
  for(let i=0;i<10;i++){const a=i/10*Math.PI*2;const r=new THREE.Mesh(new THREE.BoxGeometry(.25,1.3,.25),new THREE.MeshBasicMaterial({color:'#ffcc33'}));r.position.set(-46+Math.cos(a)*3.4,30+Math.sin(a)*3.4,-18);r.rotation.z=a-Math.PI/2;scene.add(r);}}
 
-// ---------- Campus Loop bus stop (today) / Solar Cool Stop (proposal) ----------
+// ---------- Campus Loop bus stop as the Solar Cool Stop ----------
 const sx=27,sz=10.6;
 box(13,.18,4.6,'#a9a9a3',sx,.09,sz);                     // platform
 hedge(sx-1,7.2,20,1.6,1.3);
@@ -211,14 +195,8 @@ cyl(.07,4.6,'#f3f3f3',sx-9,2.3,sz+1.8,8);
  const y=textPlane('Campus Loop',1.5,.55,{bg:'#f2c230',color:'#1a1a1a',font:'bold 150px Arial',align:'center'});y.position.set(sx-9,3.35,sz+1.86);scene.add(y);}
 // chevron bollards along kerb
 for(let i=0;i<6;i++){const x=sx+3+i*1.8;cyl(.18,1.1,'#8d9196',x,.55,13.5,10);[.55,.85].forEach(h=>{const b=cyl(.19,.14,'#f08a24',x,h,13.5,10);});cyl(.19,.08,'#222',x,.7,13.5,10);}
-// the two states live inside pivot groups so they can scale in/out around the shelter centre
-const stopToday=new THREE.Group(),stopProp=new THREE.Group();
-const todayP=new THREE.Group(),propP=new THREE.Group();
-[[todayP,stopToday],[propP,stopProp]].forEach(([p,g])=>{p.position.set(sx,2.2,sz);g.position.set(-sx,-2.2,-sz);p.add(g);scene.add(p);});
-// today: plain grey roof
-{const r=new THREE.Mesh(new THREE.BoxGeometry(12,.28,4.4),M('#8e959b'));r.position.set(sx,3.45,sz-.2);r.rotation.x=.05;add(r,stopToday);
- const f=new THREE.Mesh(new THREE.BoxGeometry(12.1,.35,.15),M('#a4abb1'));f.position.set(sx,3.4,sz+2.0);add(f,stopToday);}
-// proposal: canopy of reused panels + kit
+// canopy of reused panels + kit
+const stopProp=new THREE.Group();scene.add(stopProp);
 {const pl=new THREE.PointLight('#fff4d0',9,12,1.6);pl.position.set(sx,2.9,sz);stopProp.add(pl);const fr=new THREE.Mesh(new THREE.BoxGeometry(12.6,.25,5),M('#8f99a3'));fr.position.set(sx,3.45,sz-.1);add(fr,stopProp);
  for(let r=0;r<2;r++)for(let c=0;c<4;c++)moduleArray(stopProp,sx-4.65+c*3.1,3.75+(r?0:.18),sz-1.25+r*2.35,2,1,.08,1.5,2.2);
  [[sx-4.65,sz+1.1],[sx+4.65,sz-1.25]].forEach(([x,z])=>{const b=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,.06,16),new THREE.MeshBasicMaterial({color:'#2e9e57'}));b.position.set(x+1,4.05,z);stopProp.add(b);});
@@ -248,7 +226,7 @@ function gArrow(x,z,col,len=5,rot=0){const s=new THREE.Shape();s.moveTo(0,-.35);
  const m=new THREE.Mesh(new THREE.ShapeGeometry(s),new THREE.MeshBasicMaterial({color:col}));m.rotation.x=-Math.PI/2;m.rotation.z=rot;m.position.set(x,.1,z);scene.add(m);}
 gArrow(2,12.2,'#2e9e57',14);
 
-// ---------- Campus Loop bus (NTU blue shuttle, drives past and stops at the shelter every 10 s) ----------
+// ---------- Campus Loop bus (NTU blue shuttle; drives in, waits at the shelter, drives off, then repeats) ----------
 const bus=new THREE.Group();scene.add(bus);
 const busMats=[],wheels=[];
 function bpart(geo,c,x,y,z,o={}){const m=new THREE.Mesh(geo,M(c,o));m.position.set(x,y,z);m.castShadow=true;busMats.push({m:m.material,t0:false});bus.add(m);return m;}
@@ -265,25 +243,28 @@ function bpart(geo,c,x,y,z,o={}){const m=new THREE.Mesh(geo,M(c,o));m.position.s
  [-.85,.85].forEach(z=>{bpart(new THREE.BoxGeometry(.08,.22,.4),'#fff6c8',L/2+.02,1.05,z,{emissive:'#fff1b0',emissiveIntensity:.8});
    bpart(new THREE.BoxGeometry(.08,.2,.3),'#ff3b30',-L/2-.02,1.1,z,{emissive:'#ff2a1a',emissiveIntensity:.6});});
  bpart(new THREE.BoxGeometry(1.1,1.9,.06),'#17315f',L/2-1.6,1.45,-Wd/2-.01);     // door (kerb side)
- bpart(new THREE.BoxGeometry(.12,.18,.3),'#1a2838',L/2-.9,2.2,Wd/2+.12,glass);   // wing mirror
+ bpart(new THREE.BoxGeometry(.12,.18,.3),'#1a2838',L/2-.9,2.2,Wd/2+.12,glass);   // wing mirrors
  bpart(new THREE.BoxGeometry(.12,.18,.3),'#1a2838',L/2-.9,2.2,-Wd/2-.12,glass);
- [[-3.1,-1.1],[-3.1,1.1],[3.1,-1.1],[3.1,1.1]].forEach(([x,z])=>{const p=new THREE.Group();p.position.set(x,.52,z);
+ [[-3.1,-1.06],[-3.1,1.06],[3.1,-1.06],[3.1,1.06]].forEach(([x,z])=>{const p=new THREE.Group();p.position.set(x,.52,z);
    const w=new THREE.Mesh(new THREE.CylinderGeometry(.52,.52,.35,12),M('#1d1d1d'));w.rotation.x=Math.PI/2;w.castShadow=true;
    const hub=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.37,8),M('#9aa3ab'));hub.rotation.x=Math.PI/2;p.add(w,hub);bus.add(p);wheels.push(p);busMats.push({m:w.material,t0:false},{m:hub.material,t0:false});});
  const tp=(t,w,h,o,x,y,z,ry)=>{const m=textPlane(t,w,h,o);m.position.set(x,y,z);m.rotation.y=ry;busMats.push({m:m.material,t0:m.material.transparent});bus.add(m);};
  [[Wd/2+.02,0],[-Wd/2-.02,Math.PI]].forEach(([z,ry])=>{
-   tp('SMART CAMPUS · SMARTER THINKING',4.6,.42,{color:'#fff',font:'bold 90px Arial',align:'center'},.3,.95,z,ry);
-   tp('NTU',1,.45,{color:'#fff',font:'bold 160px Arial',align:'center'},-4.1,.95,z,ry);});
+   tp('SMART CAMPUS · SMARTER THINKING',3.6,.36,{color:'#fff',font:'bold 90px Arial',align:'center'},.6,.95,z,ry);
+   const lp=logoPanel(.9,.04);lp.position.set(-3.1,.95,z);lp.rotation.y=ry;lp.children.forEach(c=>busMats.push({m:c.material,t0:c.material.transparent}));bus.add(lp);});   // NTU logo panels
  tp('CAMPUS LOOP',1.9,.4,{bg:'#111',color:'#ffb000',font:'bold 110px Arial',align:'center'},L/2+.02,2.55,0,Math.PI/2); // destination board
  bus.position.set(-64,0,15.75);bus.visible=false;}
-const BUS_T=10;let busT=0,busPrevX=null;
-function busX(t){ // position along the road for a 10 s cycle: cruise in → brake → wait at the shelter → pull away → cruise out → off stage
-  const v=26.7;
-  if(t<2.4)return -64+v*t;
-  if(t<4.5){const u=(t-2.4)/2.1;return 28*(1-(1-u)*(1-u));}
-  if(t<6.0)return 28;
-  if(t<7.8){const u=(t-6)/1.8;return 28+24*u*u;}
-  if(t<8.55)return 52+v*(t-7.8);
+// timing profile: cruise in at BUS_V -> brake to the shelter -> wait BUS_WAIT -> pull away -> cruise out -> off stage, then repeat
+const BUS_V=15,BUS_WAIT=2,BUS_GAP=1.5;
+const tA=64/BUS_V,tB=2*28/BUS_V,tD=2*24/BUS_V,tE=20/BUS_V;
+const t1=tA,t2=t1+tB,t3=t2+BUS_WAIT,t4=t3+tD,t5=t4+tE,BUS_T=t5+BUS_GAP;
+let busT=0,busPrevX=null;
+function busX(t){
+  if(t<t1)return -64+BUS_V*t;
+  if(t<t2){const u=(t-t1)/tB;return 28*(1-(1-u)*(1-u));}
+  if(t<t3)return 28;
+  if(t<t4){const u=(t-t3)/tD;return 28+24*u*u;}
+  if(t<t5)return 52+BUS_V*(t-t4);
   return null;}
 function tickBus(dt){busT=(busT+dt)%BUS_T;const x=busX(busT);
   if(x===null){bus.visible=false;busPrevX=null;return;}
@@ -296,20 +277,18 @@ function tickBus(dt){busT=(busT+dt)%BUS_T;const x=busX(busT);
 const $=id=>document.getElementById(id);
 const ICON={play:'<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg>',
  pause:'<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><rect x="3" y="2.5" width="3.5" height="11" rx=".6" fill="currentColor"/><rect x="9.5" y="2.5" width="3.5" height="11" rx=".6" fill="currentColor"/></svg>'};
-const HS=[[-34,RY+6,-2],[-14,RY+6.3,-2],[-9,RY+5.6,B.z1+3.1],[sx,6.6,sz]];
+const HS=[[rcx,RY+6.3,-2],[sx,6.6,sz]];
 const pins=HS.map((p,i)=>{const d=document.createElement('div');d.className='pin';d.textContent=i+1;d.title='Go to stop '+(i+1);document.body.appendChild(d);return d;});
-const steps=['Hot roof','Biosolar roof','What\'s underneath','Solar Cool Stop'];
+const steps=['Biosolar roof','Solar Cool Stop'];
 $('tour').innerHTML=`<button class="nav play" id="play" title="Play / pause the guided tour (space)">${ICON.play}</button><button class="nav" id="prev" title="Previous stop (←)">‹</button>`
  +steps.map((s,i)=>`<div class="step" data-n="${i+1}"><i>${i+1}</i>${s}<em></em></div>`).join('')+`<button class="nav" id="next" title="Next stop (→)">›</button>`;
 const CARDS={
- 1:['#c8553d','Today','① Hot roof (as it is now)','Solar panels sit low over a bare concrete roof. In Singapore\'s heat the roof and panels get very hot — hotter panels produce less electricity, and heat soaks into the building below.'],
- 2:['#2e8b57','Stage 1 · Short-term pilot','② Biosolar roof','Same panels, same roof — now raised above low-growing plants.<ul><li>Cooler panels → more output</li><li>Cooler building below</li><li>New green space for biodiversity</li></ul>'],
- 3:['#2e8b57','Stage 1 · How it works','③ What\'s underneath','<ul><li><b>Plants</b> — low-growing, won\'t shade panels</li><li><b>Growing medium</b> — lightweight soil</li><li><b>Drainage layer</b></li><li><b>Root barrier + waterproofing</b></li><li><b>Existing roof slab</b> — load to be checked</li></ul>'],
- 4:['#2e8b57','Stage 2 · Long term','④ Campus Loop stop → Solar Cool Stop','When rooftop panels retire, the ones that pass safety and performance checks get a second life as the shelter\'s roof, powering:<ul><li>Ceiling fans</li><li>LED lighting</li><li>Phone charging</li></ul>A small battery covers evenings and cloudy spells.<div class="hint">Use the <b>Today / Solar Cool Stop</b> switch (top right) to compare.</div>']};
+ 1:['#2e8b57','Stage 1 · Short-term pilot','① Biosolar roof','Same panels, same roof — now raised above low-growing plants.<ul><li>Cooler panels → more output</li><li>Cooler building below</li><li>New green space for biodiversity</li></ul>'],
+ 2:['#2e8b57','Stage 2 · Long term','② Solar Cool Stop','When rooftop panels retire, the ones that pass safety and performance checks get a second life as the Campus Loop shelter\'s roof, powering:<ul><li>Ceiling fans</li><li>LED lighting</li><li>Phone charging</li></ul>A small battery covers evenings and cloudy spells.']};
 
 // ----- state -----
-let cur=0,mode='proposal',camTween=null,modeAnim=null,pendingFlip=-1;
-const HOLD=8,TWEEN=1.2,FLIP_AFTER=2.2;
+let cur=0,camTween=null;
+const HOLD=8,TWEEN=1.2;
 const tour={playing:false,paused:false,hold:0};
 
 // ----- controls -----
@@ -334,67 +313,53 @@ function setStep(n){cur=n;
 function refreshButtons(){$('start').style.display=(cur===0&&!tour.playing)?'block':'none';
   const b=$('play');b.classList.toggle('on',tour.playing);b.innerHTML=tour.playing&&!tour.paused?ICON.pause:ICON.play;
   b.title=tour.playing?(tour.paused?'Resume the guided tour (space)':'Pause the guided tour (space)'):'Play the guided tour (space)';}
-function setMode(m,animate=false){const prev=mode;mode=m;pendingFlip=-1;
-  $('tToday').className=m==='today'?'today':'';$('tProp').className=m!=='today'?'proposal':'';
-  conv[0].visible=true;bio[0].visible=false;conv[1].visible=false;bio[1].visible=true;cut.visible=true;   // roof is always split
-  const show=m==='today'?todayP:propP,hide=m==='today'?propP:todayP;
-  [todayP,propP].forEach(g=>g.scale.setScalar(1));
-  if(!animate||prev===m){modeAnim=null;show.visible=true;hide.visible=false;return;}
-  hide.visible=true;show.visible=false;show.scale.setScalar(.001);modeAnim={hide,show,t:0};}
-function goTo(n){const prev=cur;setStep(n);const v=viewFor(n);flyTo(v.p,v.t);
-  if(n===4&&prev!==4){setMode('today',false);pendingFlip=TWEEN+FLIP_AFTER;}   // stop 4: show Today first, then flip to the Solar Cool Stop
-  else pendingFlip=-1;}
+function goTo(n){setStep(n);const v=viewFor(n);flyTo(v.p,v.t);}
 
 // ----- guided tour -----
-function startTour(){tour.playing=true;tour.paused=false;tour.hold=0;goTo(cur>=1&&cur<4?cur:1);refreshButtons();}
+function startTour(){tour.playing=true;tour.paused=false;tour.hold=0;goTo(cur>=1&&cur<NSTOPS?cur:1);refreshButtons();}
 function stopTour(){if(!tour.playing)return;tour.playing=false;tour.paused=false;document.querySelectorAll('#tour .step em').forEach(e=>e.style.width='0');refreshButtons();}
 function endTour(){stopTour();goTo(0);}
 function tickTour(dt){if(!tour.playing||tour.paused||camTween)return;tour.hold+=dt;
   const act=document.querySelector('#tour .step.act em');if(act)act.style.width=(clamp(tour.hold/HOLD,0,1)*100)+'%';
-  if(tour.hold>=HOLD){tour.hold=0;if(cur>=4)endTour();else goTo(cur+1);}}
+  if(tour.hold>=HOLD){tour.hold=0;if(cur>=NSTOPS)endTour();else goTo(cur+1);}}
 const userNav=fn=>{stopTour();fn();};
+const nextStop=()=>(cur+1)%(NSTOPS+1),prevStop=()=>(cur+NSTOPS)%(NSTOPS+1);
 
 // ----- events -----
 pins.forEach((p,i)=>p.addEventListener('click',()=>userNav(()=>goTo(i+1))));
 document.querySelectorAll('#tour .step').forEach(d=>d.addEventListener('click',()=>userNav(()=>goTo(+d.dataset.n))));
-$('prev').addEventListener('click',()=>userNav(()=>goTo((cur+4)%5)));
-$('next').addEventListener('click',()=>userNav(()=>goTo((cur+1)%5)));
+$('prev').addEventListener('click',()=>userNav(()=>goTo(prevStop())));
+$('next').addEventListener('click',()=>userNav(()=>goTo(nextStop())));
 $('play').addEventListener('click',()=>{if(tour.playing){tour.paused=!tour.paused;refreshButtons();}else startTour();});
 $('start').addEventListener('click',startTour);
 $('reset').addEventListener('click',()=>userNav(()=>goTo(0)));
-$('tToday').addEventListener('click',()=>userNav(()=>setMode('today',true)));
-$('tProp').addEventListener('click',()=>userNav(()=>setMode('proposal',true)));
 // any drag / wheel on the scene cancels an in-flight camera move and stops the auto tour
 ['pointerdown','wheel'].forEach(ev=>renderer.domElement.addEventListener(ev,()=>{cancelFly();stopTour();},{capture:true,passive:true}));
 addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;
-  if(e.key==='ArrowRight'){userNav(()=>goTo((cur+1)%5));}else if(e.key==='ArrowLeft'){userNav(()=>goTo((cur+4)%5));}
+  if(e.key==='ArrowRight'){userNav(()=>goTo(nextStop()));}else if(e.key==='ArrowLeft'){userNav(()=>goTo(prevStop()));}
   else if(e.key===' '){e.preventDefault();$('play').click();}else if(e.key==='Escape'||e.key==='Home'){userNav(()=>goTo(0));}
-  else if(e.key>='1'&&e.key<='4'){userNav(()=>goTo(+e.key));}else if(e.key==='t'||e.key==='T'){userNav(()=>setMode(mode==='today'?'proposal':'today',true));}});
+  else if(/^[0-9]$/.test(e.key)&&+e.key<=NSTOPS){userNav(()=>goTo(+e.key));}});
 addEventListener('resize',()=>{W=innerWidth;H=innerHeight;camera.aspect=W/H;camera.updateProjectionMatrix();renderer.setSize(W,H);});
 
 // ----- window API kept for shoot2.mjs (stills / tour frames) -----
 window.setStep=setStep;
-window.setMode=(m)=>setMode(m,false);
+window.setMode=()=>{};   // kept for older scripts: there is only one bus-stop state now
 window.setUI=(v)=>{document.querySelectorAll('.ui').forEach(e=>e.style.visibility=v?'visible':'hidden');pins.forEach(p=>p.style.visibility=v?'':'hidden');window._ui=v;};
 window._ui=true;
 window.setCam=(p,t)=>{cancelFly();camera.position.set(...p);controls.target.set(...t);controls.update();camera.updateMatrixWorld();};
 window.showPins=(v)=>pins.forEach(p=>p.style.display=v?'flex':'none');
 window.hideCard=()=>{$('card').style.display='none'};
-window.goTo=goTo;window.startTour=startTour;window.stopTour=stopTour;window.setBusT=(t)=>{busT=t;busPrevX=null;};window.state=()=>({cur,mode,playing:tour.playing,paused:tour.paused,flying:!!camTween,bus:{t:+busT.toFixed(2),x:+bus.position.x.toFixed(1),visible:bus.visible,opacity:+busMats[0].m.opacity.toFixed(2)}});
+window.goTo=goTo;window.startTour=startTour;window.stopTour=stopTour;window.setBusT=(t)=>{busT=t;busPrevX=null;};
+window.state=()=>({cur,playing:tour.playing,paused:tour.paused,flying:!!camTween,bus:{t:+busT.toFixed(2),x:+bus.position.x.toFixed(1),visible:bus.visible,opacity:+busMats[0].m.opacity.toFixed(2)},busCycle:+BUS_T.toFixed(2)});
 
 // ----- render loop -----
 const _v=new THREE.Vector3();let T=0;
 function tick(dt){T+=dt;
   fans.forEach(f=>f.rotation.y+=dt*7);
-  heatArrows.forEach(a=>{const f=(T*.35+a.ph)%1;a.g.position.y=a.y0+f*1.4;a.mat.opacity=.1+.9*Math.sin(f*Math.PI);});
   evapArrows.forEach(a=>{const f=(T*.22+a.ph)%1;a.g.position.y=a.y0+f*1.1;a.g.position.x=a.x0+Math.sin(T*1.6+a.ph*6.28)*.08;a.mat.opacity=.15+.85*Math.sin(f*Math.PI);});
   tickBus(dt);
-  if(modeAnim){const a=modeAnim;a.t+=dt;
-    if(a.t<.25){const k=1-(a.t/.25)*(a.t/.25);a.hide.scale.setScalar(Math.max(k,.001));}
-    else{a.hide.visible=false;a.show.visible=true;const u=Math.min(1,(a.t-.25)/.45);a.show.scale.setScalar(Math.max(easeOutBack(u),.001));if(u>=1){a.show.scale.setScalar(1);modeAnim=null;}}}
   if(camTween){const c=camTween;c.t+=dt;const k=easeInOutCubic(Math.min(1,c.t/c.dur));camera.position.lerpVectors(c.p0,c.p1,k);controls.target.lerpVectors(c.t0,c.t1,k);if(k>=1)cancelFly();}
   controls.update();clampTarget();
-  if(pendingFlip>0){pendingFlip-=dt;if(pendingFlip<=0){pendingFlip=-1;if(cur===4&&mode==='today')setMode('proposal',true);}}
   tickTour(dt);}
 function placePins(){HS.forEach((h,i)=>{const v=_v.set(...h).project(camera);const d=pins[i];
   if(!window._ui||v.z>1||Math.abs(v.x)>1.05||Math.abs(v.y)>1.05){d.style.visibility='hidden';return;}d.style.visibility='visible';
@@ -404,7 +369,6 @@ const clock=new THREE.Clock();
 function frame(){requestAnimationFrame(frame);const dt=Math.min(clock.getDelta(),.5);tick(dt);renderer.render(scene,camera);placePins();}
 
 // ----- start -----
-setMode('proposal');
 {const v=viewFor(0);camera.position.set(...v.p);controls.target.set(...v.t);controls.update();}
 setStep(0);
 frame();
