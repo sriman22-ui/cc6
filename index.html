@@ -45,7 +45,7 @@
 <script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
 </head><body>
 <div id="c"></div>
-<div id="title" class="ui"><b>Journey of a Solar Panel</b><span>Biosolar roofs + Solar Cool Stops · NTU campus concept</span><small>Drag to orbit · scroll to zoom · click a numbered pin</small></div>
+<div id="title" class="ui"><b>Journey of a Solar Panel</b><span>Biosolar roofs + Solar Cool Stops · NTU campus concept</span><small>Two-finger swipe or drag to orbit · pinch or scroll to zoom · click a numbered pin</small></div>
 <div id="card" class="ui"></div>
 <button id="start" class="ui">▶ Start the guided tour</button>
 <button id="reset" class="ui" title="Back to the overview (Esc)">⟲ Reset view</button>
@@ -69,7 +69,7 @@ sunL.shadow.bias=-0.0005;scene.add(sunL);
 
 // ---------- camera views (views.json is the source of truth; inline copy is only a fallback for file:// opens) ----------
 let VIEWS={stills:{
- "01_overview":{p:[-6,44,70],t:[-5,4,0]},"03_biosolar_roof":{p:[-22,30,24],t:[-22,13.6,-2]},"04_solar_coolstop":{p:[40,7.5,25],t:[29.5,2.2,9.5]}}};
+ "01_overview":{p:[-6,44,70],t:[-5,4,0]},"03_biosolar_roof":{p:[-22,30,24],t:[-22,13.6,-2]},"04_solar_coolstop":{p:[44,8,20],t:[27,2,11]}}};
 try{const r=await fetch('./views.json');if(r.ok)VIEWS=await r.json();}catch(e){console.warn('views.json not loaded, using inline views',e);}
 const STOP_VIEW={0:'01_overview',1:'03_biosolar_roof',2:'04_solar_coolstop'};
 const NSTOPS=2;
@@ -188,13 +188,13 @@ box(11,.9,.35,'#b8b6ae',sx,.45,sz-2);                   // low concrete wall
 box(11,1.9,.06,'#cfe3ec',sx,1.9,sz-2,{transparent:true,opacity:.45,roughness:.1}); // glass back panel
 [-5.2,5.2].forEach(dx=>cyl(.16,3.4,'#eeeeea',sx+dx,1.7,sz-1.95,10));
 // bench
-box(6,.15,.9,'#9aa1a7',sx,.9,sz-1.3);[-2.5,2.5].forEach(dx=>box(.15,.85,.8,'#6d747a',sx+dx,.45,sz-1.3));
+box(6,.15,.9,'#9aa1a7',sx,.62,sz-1.3);[-2.5,2.5].forEach(dx=>box(.15,.55,.8,'#6d747a',sx+dx,.3,sz-1.3));
 // sign pole with route signs
 cyl(.07,4.6,'#f3f3f3',sx-9,2.3,sz+1.8,8);
 {const g=textPlane('Campus Rider',1.5,.5,{bg:'#1d6e3a',color:'#fff',font:'bold 150px Arial',align:'center'});g.position.set(sx-9,4,sz+1.86);scene.add(g);
  const y=textPlane('Campus Loop',1.5,.55,{bg:'#f2c230',color:'#1a1a1a',font:'bold 150px Arial',align:'center'});y.position.set(sx-9,3.35,sz+1.86);scene.add(y);}
 // chevron bollards along kerb
-for(let i=0;i<6;i++){const x=sx+3+i*1.8;cyl(.18,1.1,'#8d9196',x,.55,13.5,10);[.55,.85].forEach(h=>{const b=cyl(.19,.14,'#f08a24',x,h,13.5,10);});cyl(.19,.08,'#222',x,.7,13.5,10);}
+for(let i=0;i<6;i++){const x=sx+7.6+i*1.8;/* beyond the shelter's end, as in the photo */cyl(.18,1.1,'#8d9196',x,.55,13.5,10);[.55,.85].forEach(h=>{const b=cyl(.19,.14,'#f08a24',x,h,13.5,10);});cyl(.19,.08,'#222',x,.7,13.5,10);}
 // canopy of reused panels + kit
 const stopProp=new THREE.Group();scene.add(stopProp);
 {const pl=new THREE.PointLight('#fff4d0',9,12,1.6);pl.position.set(sx,2.9,sz);stopProp.add(pl);const fr=new THREE.Mesh(new THREE.BoxGeometry(12.6,.25,5),M('#8f99a3'));fr.position.set(sx,3.45,sz-.1);add(fr,stopProp);
@@ -212,23 +212,41 @@ const fans=[];
  hub.add(new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,.18,10),M('#eee')));
  for(let i=0;i<3;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(1.4,.04,.3),M('#f5f5f5'));b.position.x=.75;const p=new THREE.Group();p.rotation.y=i*Math.PI*2/3;p.add(b);hub.add(p);}
  stopProp.add(hub);fans.push(hub);});
-// people
-function person(x,z,shirt,sit=false,rot=0){const g=new THREE.Group();const b=new THREE.Mesh(new THREE.CapsuleGeometry(.3,.8,4,8),M(shirt));b.position.y=sit?1.45:1.15;b.castShadow=true;
- const hd=new THREE.Mesh(new THREE.SphereGeometry(.27,10,8),M('#d9ad88'));hd.position.y=sit?2.2:1.95;
- if(!sit){[-.14,.14].forEach(dx=>{const l=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.8,6),M('#33415c'));l.position.set(dx,.4,0);g.add(l);});}
- else{const l=new THREE.Mesh(new THREE.BoxGeometry(.5,.2,.65),M('#33415c'));l.position.set(0,1.05,.32);g.add(l);}
- g.add(b,hd);g.position.set(x,0,z);g.rotation.y=rot;scene.add(g);}
-person(sx-1.3,sz-1.3,'#e76f51',true);person(sx+1.1,sz-1.3,'#2a9d8f',true);person(sx-3.4,sz+1.5,'#f4a261',false,Math.PI*.9);
-person(13,12.4,'#6d597a',false,-1.4);person(-11,12.1,'#457b9d',false,1.5);
 
-// ground arrows along journey
-function gArrow(x,z,col,len=5,rot=0){const s=new THREE.Shape();s.moveTo(0,-.35);s.lineTo(len-1,-.35);s.lineTo(len-1,-.8);s.lineTo(len,0);s.lineTo(len-1,.8);s.lineTo(len-1,.35);s.lineTo(0,.35);
- const m=new THREE.Mesh(new THREE.ShapeGeometry(s),new THREE.MeshBasicMaterial({color:col}));m.rotation.x=-Math.PI/2;m.rotation.z=rot;m.position.set(x,.1,z);scene.add(m);}
-gArrow(2,12.2,'#2e9e57',14);
+
+// what the canopy panels power: labelled appliances, wiring and moving energy pulses
+function tagSprite(txt){const c=document.createElement('canvas');c.width=512;c.height=128;const g=c.getContext('2d');
+  g.fillStyle='rgba(255,255,255,.96)';g.beginPath();g.roundRect(4,4,504,120,28);g.fill();g.lineWidth=6;g.strokeStyle='#f2b632';g.stroke();
+  g.fillStyle='#f2b632';g.beginPath();g.moveTo(66,20);g.lineTo(34,72);g.lineTo(58,72);g.lineTo(48,110);g.lineTo(84,56);g.lineTo(60,56);g.closePath();g.fill();  // lightning bolt
+  g.fillStyle='#173a5e';let fs=52;g.font=`bold ${fs}px Arial`;while(g.measureText(txt).width>390&&fs>20){fs-=2;g.font=`bold ${fs}px Arial`;}g.textBaseline='middle';g.fillText(txt,100,66);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,depthTest:false}));sp.renderOrder=10;sp.scale.set(2.4,.6,1);sp.center.set(.5,0);return sp;}
+const POWER=[ // [label, label position (bottom-centre of the tag), anchor on the appliance]
+ ['Reused solar panels',[sx-1.2,5.1,sz+1.2],[sx-1.2,4.05,sz+.6]],
+ ['Ceiling fans',[sx-2.6,2.5,sz+1.6],[sx-2.6,2.7,sz+.2]],
+ ['LED lighting',[sx+1.8,2.45,sz+3.0],[sx+1.8,3.2,sz+2.2]],
+ ['Phone charging',[sx+6.6,2.6,sz+1.6],[sx+5.6,2.0,sz+.8]],
+ ['Battery storage',[sx-8.4,2.3,sz+1.0],[sx-5.9,1.05,sz-.8]]];
+const leaderMat=new THREE.LineBasicMaterial({color:'#173a5e',transparent:true,opacity:.7});
+POWER.forEach(([txt,lp,ap])=>{const sp=tagSprite(txt);sp.position.set(...lp);scene.add(sp);
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...ap),new THREE.Vector3(...lp)]),leaderMat));
+  const dot=new THREE.Mesh(new THREE.SphereGeometry(.06,8,6),new THREE.MeshBasicMaterial({color:'#173a5e'}));dot.position.set(...ap);scene.add(dot);});
+const J=[sx,3.3,sz-.1];   // junction box under the canopy
+const ROUTES=[[J,[sx-2.6,3.05,sz]],[J,[sx+2.6,3.05,sz]],[J,[sx,3.26,sz+2.1]],[J,[sx,3.26,sz-2.2]],
+ [J,[sx+5.2,3.3,sz-1.95],[sx+5.2,1.7,sz-1.95],[sx+5.6,1.7,sz+.3]],
+ [J,[sx-5.2,3.3,sz-1.95],[sx-5.2,1.0,sz-1.95],[sx-5.9,1.0,sz-1.1]]];
+const pulses=[],pulseMat=new THREE.MeshBasicMaterial({color:'#ffd54a'}),wireMat=new THREE.LineBasicMaterial({color:'#f2b632',transparent:true,opacity:.6});
+{const jb=new THREE.Mesh(new THREE.BoxGeometry(.4,.2,.3),M('#5a6470'));jb.position.set(...J);scene.add(jb);}
+ROUTES.forEach(r=>{const pts=r.map(p=>new THREE.Vector3(...p));scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),wireMat));
+  const len=pts.reduce((a,p,i)=>i?a+p.distanceTo(pts[i-1]):0,0);
+  for(let k=0;k<2;k++){const m=new THREE.Mesh(new THREE.SphereGeometry(.08,8,6),pulseMat);scene.add(m);pulses.push({m,pts,len,off:k/2});}});
+function tickPower(){pulses.forEach(p=>{let d=((T*1.6/p.len+p.off)%1)*p.len;
+  for(let i=1;i<p.pts.length;i++){const seg=p.pts[i].distanceTo(p.pts[i-1]);if(d<=seg){p.m.position.lerpVectors(p.pts[i-1],p.pts[i],d/seg);return;}d-=seg;}
+  p.m.position.copy(p.pts[p.pts.length-1]);});}
 
 // ---------- Campus Loop bus (NTU blue shuttle; drives in, waits at the shelter, drives off, then repeats) ----------
 const bus=new THREE.Group();scene.add(bus);
-const busMats=[],wheels=[];
+const busMats=[],wheels=[];let busDoor;
 function bpart(geo,c,x,y,z,o={}){const m=new THREE.Mesh(geo,M(c,o));m.position.set(x,y,z);m.castShadow=true;busMats.push({m:m.material,t0:false});bus.add(m);return m;}
 {const L=10,Wd=2.5,glass={roughness:.25,metalness:.2};
  bpart(new THREE.BoxGeometry(L,1.0,Wd),'#1e4fa6',0,.95,0);                       // lower body (dark NTU blue)
@@ -242,7 +260,7 @@ function bpart(geo,c,x,y,z,o={}){const m=new THREE.Mesh(geo,M(c,o));m.position.s
  bpart(new THREE.BoxGeometry(.3,.4,Wd),'#2a2f36',-L/2+.1,.6,0);                  // rear bumper
  [-.85,.85].forEach(z=>{bpart(new THREE.BoxGeometry(.08,.22,.4),'#fff6c8',L/2+.02,1.05,z,{emissive:'#fff1b0',emissiveIntensity:.8});
    bpart(new THREE.BoxGeometry(.08,.2,.3),'#ff3b30',-L/2-.02,1.1,z,{emissive:'#ff2a1a',emissiveIntensity:.6});});
- bpart(new THREE.BoxGeometry(1.1,1.9,.06),'#17315f',L/2-1.6,1.45,-Wd/2-.01);     // door (kerb side)
+ busDoor=bpart(new THREE.BoxGeometry(1.1,1.9,.06),'#17315f',L/2-1.6,1.45,-Wd/2-.01);     // door (kerb side, slides open at the stop)
  bpart(new THREE.BoxGeometry(.12,.18,.3),'#1a2838',L/2-.9,2.2,Wd/2+.12,glass);   // wing mirrors
  bpart(new THREE.BoxGeometry(.12,.18,.3),'#1a2838',L/2-.9,2.2,-Wd/2-.12,glass);
  [[-3.1,-1.06],[-3.1,1.06],[3.1,-1.06],[3.1,1.06]].forEach(([x,z])=>{const p=new THREE.Group();p.position.set(x,.52,z);
@@ -252,26 +270,103 @@ function bpart(geo,c,x,y,z,o={}){const m=new THREE.Mesh(geo,M(c,o));m.position.s
  [[Wd/2+.02,0],[-Wd/2-.02,Math.PI]].forEach(([z,ry])=>{
    tp('SMART CAMPUS · SMARTER THINKING',3.6,.36,{color:'#fff',font:'bold 90px Arial',align:'center'},.6,.95,z,ry);
    const lp=logoPanel(.9,.04);lp.position.set(-3.1,.95,z);lp.rotation.y=ry;lp.children.forEach(c=>busMats.push({m:c.material,t0:c.material.transparent}));bus.add(lp);});   // NTU logo panels
- tp('CAMPUS LOOP',1.9,.4,{bg:'#111',color:'#ffb000',font:'bold 110px Arial',align:'center'},L/2+.02,2.55,0,Math.PI/2); // destination board
+ tp('CAMPUS LOOP',1.9,.4,{bg:'#111',color:'#ffb000',font:'bold 110px Arial',align:'center'},L/2+.07,2.55,0,Math.PI/2); // destination board
  bus.position.set(-64,0,15.75);bus.visible=false;}
 // timing profile: cruise in at BUS_V -> brake to the shelter -> wait BUS_WAIT -> pull away -> cruise out -> off stage, then repeat
-const BUS_V=15,BUS_WAIT=2,BUS_GAP=1.5;
-const tA=64/BUS_V,tB=2*28/BUS_V,tD=2*24/BUS_V,tE=20/BUS_V;
+const BUS_V=15,BUS_WAIT=4,BUS_GAP=1.5,X_STOP=25;   // bus centre while stopped: its door lines up with the shelter platform
+const tA=64/BUS_V,tB=2*X_STOP/BUS_V,tD=2*(52-X_STOP)/BUS_V,tE=20/BUS_V;
 const t1=tA,t2=t1+tB,t3=t2+BUS_WAIT,t4=t3+tD,t5=t4+tE,BUS_T=t5+BUS_GAP;
-let busT=0,busPrevX=null;
+let busT=0,cycT=0,busPrevX=null;
+const smooth=(v,a,b)=>{const u=clamp((v-a)/(b-a),0,1);return u*u*(3-2*u);};
 function busX(t){
   if(t<t1)return -64+BUS_V*t;
-  if(t<t2){const u=(t-t1)/tB;return 28*(1-(1-u)*(1-u));}
-  if(t<t3)return 28;
-  if(t<t4){const u=(t-t3)/tD;return 28+24*u*u;}
+  if(t<t2){const u=(t-t1)/tB;return X_STOP*(1-(1-u)*(1-u));}
+  if(t<t3)return X_STOP;
+  if(t<t4){const u=(t-t3)/tD;return X_STOP+(52-X_STOP)*u*u;}
   if(t<t5)return 52+BUS_V*(t-t4);
   return null;}
-function tickBus(dt){busT=(busT+dt)%BUS_T;const x=busX(busT);
+function tickBus(dt){cycT+=dt;busT=cycT%BUS_T;const x=busX(busT);
+  busDoor.position.x=3.4-1.05*smooth(busT,t2+.1,t2+.6)*(1-smooth(busT,t3-.6,t3-.1));   // door slides open while the bus waits
   if(x===null){bus.visible=false;busPrevX=null;return;}
   bus.visible=true;bus.position.x=x;
   const op=clamp(Math.min((x+54)/10,(66-x)/10),0,1);
   busMats.forEach(({m,t0})=>{m.opacity=op;m.transparent=t0||op<1;});
   if(busPrevX!==null)wheels.forEach(p=>p.rotation.z-=(x-busPrevX)/.52);busPrevX=x;}
+
+
+// ---------- students (outfits after the "Student Vol 01" sheet): walk to the Cool Stop, wait, board; alight and walk away ----------
+const OUTFITS=[
+ {shirt:'#8a8f98',pants:'#2b3340',hair:'#3a2a1e',skin:'#e0b48f',sleeves:true,bag:'#4a5563'},  // ST01 01 grey hoodie, dark jeans
+ {shirt:'#3b3f46',pants:'#262a33',hair:'#1d1a17',skin:'#d9a97f',bag:'#8a2f2f'},               // ST01 02 dark tee
+ {shirt:'#f2c5cf',pants:'#e9e6e0',hair:'#2a211b',skin:'#e6bc96'},                             // ST01 03 pink tee, white trousers
+ {shirt:'#f2c230',pants:'#2a2f3a',hair:'#1a1511',skin:'#c99065',number:'32',shorts:true},      // ST01 04 yellow jersey 32, shorts
+ {shirt:'#1e1f24',pants:'#1a1b20',hair:'#1a1511',skin:'#d8a77c',sleeves:true},                 // ST01 05 black jacket
+ {shirt:'#e9558a',pants:'#6c7480',hair:'#3a2418',skin:'#e4b893',long:true},                    // ST01 06 pink tee, grey jeans
+ {shirt:'#f4f1ea',pants:'#c9cbd0',hair:'#171310',skin:'#e8c19b',long:true},                    // ST01 07 white blouse
+ {shirt:'#f08a7a',pants:'#2f3a52',hair:'#2a1b12',skin:'#e4b893',long:true,bag:'#d9c7a6'},      // ST01 08 salmon top, jeans
+ {shirt:'#9fd3ea',pants:'#3f5f9a',hair:'#1b1612',skin:'#deb08a',long:true},                    // ST01 09 light-blue top
+ {shirt:'#c8322e',pants:'#2b2d33',hair:'#241a14',skin:'#d9a97f',long:true}];                   // ST01 10 red top
+function makeStudent(o){const g=new THREE.Group(),mats=[];
+  const mk=(geo,c,x,y,z,parent)=>{const m=new THREE.Mesh(geo,M(c));m.position.set(x,y,z);m.castShadow=true;parent.add(m);mats.push({m:m.material,t0:false});return m;};
+  mk(new THREE.BoxGeometry(.46,.62,.26),o.shirt,0,1.17,0,g);                                   // torso
+  if(o.number){const n=textPlane(o.number,.3,.3,{color:'#1d2b5e',font:'bold 220px Arial',align:'center'});n.position.set(0,1.22,.135);g.add(n);mats.push({m:n.material,t0:true});}
+  mk(new THREE.SphereGeometry(.18,10,8),o.skin,0,1.68,0,g);                                     // head
+  const hair=mk(new THREE.SphereGeometry(.19,10,8),o.hair,0,1.74,-.03,g);hair.scale.y=.7;
+  if(o.long)mk(new THREE.BoxGeometry(.3,.36,.14),o.hair,0,1.54,-.13,g);                        // long hair
+  if(o.bag)mk(new THREE.BoxGeometry(.34,.42,.16),o.bag,0,1.18,-.2,g);                           // backpack
+  const arms=[-1,1].map(sd=>{const p=new THREE.Group();p.position.set(sd*.3,1.42,0);g.add(p);
+    mk(new THREE.BoxGeometry(.12,o.sleeves?.58:.3,.12),o.shirt,0,o.sleeves?-.29:-.15,0,p);
+    if(!o.sleeves)mk(new THREE.BoxGeometry(.11,.3,.11),o.skin,0,-.44,0,p);return p;});
+  const legs=[-1,1].map(sd=>{const hip=new THREE.Group();hip.position.set(sd*.12,.86,0);g.add(hip);
+    mk(new THREE.BoxGeometry(.17,.38,.17),o.pants,0,-.19,0,hip);
+    const knee=new THREE.Group();knee.position.y=-.38;hip.add(knee);
+    mk(new THREE.BoxGeometry(.16,.44,.16),o.shorts?o.skin:o.pants,0,-.22,0,knee);
+    mk(new THREE.BoxGeometry(.18,.1,.27),'#2b2b2b',0,-.46,.04,knee);return {hip,knee};});
+  g.scale.setScalar(.92);g.visible=false;scene.add(g);
+  return {g,mats,arms,legs,ph:0,wa:0,sit:0,px:null,pz:null};}
+// a schedule is a list of keyframes {t,x,z,s,f}: s = hide | wait | sit | walk | board | alight, repeated every P seconds
+const FADE=.5,WALK=2.2,DOOR={x:X_STOP+3.4,zk:13.5,zin:14.6},ARR=t2,DEP=t3;
+function sched(){const k=[];let t=0,x=0,z=0;const push=(s,o={})=>k.push({t,x,z,s,...o});const me={
+  at(nx,nz){x=nx;z=nz;return me;},
+  hide(until=0){push('hide');t=Math.max(t,until);return me;},
+  wait(until=0,f=-1.2){push('wait',{f});t=Math.max(t,until);return me;},
+  sit(until=0,f=0){push('sit',{f});t=Math.max(t,until);return me;},
+  walk(nx,nz,v=WALK){push('walk');t+=Math.hypot(nx-x,nz-z)/v;x=nx;z=nz;return me;},
+  goAt(nx,nz,tArrive,f=-1.2,v=WALK){const d=Math.hypot(nx-x,nz-z)/v;push('wait',{f});t=Math.max(t,tArrive-d);push('walk');t+=d;x=nx;z=nz;return me;},
+  sitUntilGoAt(nx,nz,tArrive,f=0,v=WALK){const d=Math.hypot(nx-x,nz-z)/v;push('sit',{f});t=Math.max(t,tArrive-d);push('walk');t+=d;x=nx;z=nz;return me;},
+  board(){push('board');t+=.6;z=DOOR.zin;return me;},
+  alight(){x=DOOR.x;z=DOOR.zin;push('alight');t+=.6;z=DOOR.zk;return me;},
+  end(P=BUS_T){return {k,P};}};return me;}
+const agents=[
+ [1,sched().at(11,13.2).hide(.4).walk(27.2,12.5).goAt(DOOR.x,DOOR.zk,ARR+1.6).board().hide().end()],            // walks in, waits by the door, boards
+ [5,sched().at(15,13.3).hide(1.2).walk(25.8,13.2).goAt(DOOR.x,DOOR.zk,ARR+3.4).board().hide().end()],           // walks in, boards last
+ [3,sched().at(26.3,9.35).sitUntilGoAt(DOOR.x,DOOR.zk,ARR+2.2).board().hide().end()],                           // sits on the bench, stands as the bus pulls in, boards
+ [7,sched().at(28.3,9.35).sit().end()],                                                                          // keeps waiting on the bench
+ [4,sched().at(20.5,11.6).wait(0,-.9).end()],                                                                    // waits by the sign pole
+ [8,sched().hide(ARR+.4).alight().walk(31,12.6).walk(48,12.6).hide().end()],                                    // alights, walks away along the footpath
+ [0,sched().hide(ARR+1.0).alight().walk(17,13.1).walk(16,10.6).hide().end()],                                   // alights, walks into campus
+ [6,sched().at(-9,11.2).hide(.5).walk(-6,12.9).walk(26,11.6).goAt(DOOR.x,DOOR.zk,BUS_T+ARR+2.8).board().hide().end(2*BUS_T)], // comes from the EEE building, catches the next bus
+ [2,sched().at(-24,13.3).hide(3).walk(4,13.3,2.0).hide().end()],                                                 // passer-by along the frontage
+ [9,sched().at(6,12.6).hide(9).walk(-22,12.6,2.0).hide().end(2*BUS_T)]                                           // passer-by the other way
+].map(([o,sc])=>({st:makeStudent(OUTFITS[o]),...sc}));
+function poseStudent(s,ry,x,z){const g=s.g,ph=s.ph,st=s.sit,wa=s.wa*(1-st),sw=Math.sin(ph);
+  g.position.set(x,-.05*st+wa*.02*Math.abs(Math.sin(ph)),z);g.rotation.y=ry;
+  s.legs[0].hip.rotation.x=-1.3*st-.55*sw*wa;s.legs[1].hip.rotation.x=-1.3*st+.55*sw*wa;
+  s.legs[0].knee.rotation.x=1.3*st+.5*wa*Math.max(0,Math.sin(ph+.9));s.legs[1].knee.rotation.x=1.3*st+.5*wa*Math.max(0,Math.sin(ph+Math.PI+.9));
+  s.arms[0].rotation.x=-.6*st+.45*sw*wa;s.arms[1].rotation.x=-.6*st-.45*sw*wa;}
+function tickPeople(dt){for(const a of agents){const P=a.P,k=a.k,n=k.length,tau=cycT%P,s=a.st;
+  let i=n-1;for(let j=0;j<n;j++){if(k[j].t>tau){i=j-1;break;}}if(i<0)i=0;
+  const cur=k[i],nxt=k[(i+1)%n],prev=k[(i+n-1)%n],tS=cur.t,tE=i<n-1?nxt.t:P,u=clamp((tau-tS)/Math.max(1e-3,tE-tS),0,1);
+  if(cur.s==='hide'){s.g.visible=false;s.px=null;continue;}
+  const mv=cur.s==='walk'||cur.s==='board'||cur.s==='alight';
+  const x=mv?cur.x+(nxt.x-cur.x)*u:cur.x,z=mv?cur.z+(nxt.z-cur.z)*u:cur.z;
+  let op=1;if(prev.s==='hide')op=Math.min(op,(tau-tS)/FADE);if(nxt.s==='hide')op=Math.min(op,(tE-tau)/FADE);
+  if(cur.s==='board')op=Math.min(op,1-u);if(cur.s==='alight')op=Math.min(op,u);op=clamp(op,0,1);
+  s.g.visible=op>0;s.mats.forEach(({m,t0})=>{m.opacity=op;m.transparent=t0||op<1;});
+  let ry=cur.f??0;if(mv){const dx=nxt.x-cur.x,dz=nxt.z-cur.z;if(dx*dx+dz*dz>1e-6)ry=Math.atan2(dx,dz);}
+  let moved=0;if(s.px!==null){moved=Math.hypot(x-s.px,z-s.pz);if(moved>2)moved=0;}s.px=x;s.pz=z;s.ph+=moved*4.5;
+  s.wa+=((moved>1e-4?1:0)-s.wa)*Math.min(1,dt*8);s.sit+=((cur.s==='sit'?1:0)-s.sit)*Math.min(1,dt*5);
+  poseStudent(s,ry,x,z);}}
 
 // ---------- hotspots / UI ----------
 const $=id=>document.getElementById(id);
@@ -333,8 +428,20 @@ $('next').addEventListener('click',()=>userNav(()=>goTo(nextStop())));
 $('play').addEventListener('click',()=>{if(tour.playing){tour.paused=!tour.paused;refreshButtons();}else startTour();});
 $('start').addEventListener('click',startTour);
 $('reset').addEventListener('click',()=>userNav(()=>goTo(0)));
-// any drag / wheel on the scene cancels an in-flight camera move and stops the auto tour
-['pointerdown','wheel'].forEach(ev=>renderer.domElement.addEventListener(ev,()=>{cancelFly();stopTour();},{capture:true,passive:true}));
+// any drag / swipe on the scene cancels an in-flight camera move and stops the auto tour
+renderer.domElement.addEventListener('pointerdown',()=>{cancelFly();stopTour();},{capture:true,passive:true});
+// trackpad: a two-finger swipe orbits, a pinch (ctrl+wheel) zooms; a mouse wheel keeps zooming
+const wheelRot={theta:0,phi:0};
+renderer.domElement.addEventListener('wheel',e=>{e.preventDefault();cancelFly();stopTour();
+  const mouseLike=e.deltaMode!==0||(e.deltaX===0&&Math.abs(e.deltaY)>=50&&Math.abs(e.wheelDeltaY||0)%120===0);
+  if(e.ctrlKey||mouseLike)return;                                   // OrbitControls handles the zoom
+  e.stopImmediatePropagation();
+  wheelRot.theta-=e.deltaX*.004;wheelRot.phi-=e.deltaY*.004;},{capture:true,passive:false});
+const _off=new THREE.Vector3(),_sph=new THREE.Spherical();
+function applyWheelOrbit(dt){if(Math.abs(wheelRot.theta)<1e-4&&Math.abs(wheelRot.phi)<1e-4)return;
+  const k=Math.min(1,dt*10),dth=wheelRot.theta*k,dph=wheelRot.phi*k;wheelRot.theta-=dth;wheelRot.phi-=dph;
+  _off.copy(camera.position).sub(controls.target);_sph.setFromVector3(_off);_sph.theta+=dth;_sph.phi=clamp(_sph.phi+dph,controls.minPolarAngle,controls.maxPolarAngle);
+  camera.position.copy(controls.target).add(_off.setFromSpherical(_sph));}
 addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;
   if(e.key==='ArrowRight'){userNav(()=>goTo(nextStop()));}else if(e.key==='ArrowLeft'){userNav(()=>goTo(prevStop()));}
   else if(e.key===' '){e.preventDefault();$('play').click();}else if(e.key==='Escape'||e.key==='Home'){userNav(()=>goTo(0));}
@@ -349,17 +456,17 @@ window._ui=true;
 window.setCam=(p,t)=>{cancelFly();camera.position.set(...p);controls.target.set(...t);controls.update();camera.updateMatrixWorld();};
 window.showPins=(v)=>pins.forEach(p=>p.style.display=v?'flex':'none');
 window.hideCard=()=>{$('card').style.display='none'};
-window.goTo=goTo;window.startTour=startTour;window.stopTour=stopTour;window.setBusT=(t)=>{busT=t;busPrevX=null;};
-window.state=()=>({cur,playing:tour.playing,paused:tour.paused,flying:!!camTween,bus:{t:+busT.toFixed(2),x:+bus.position.x.toFixed(1),visible:bus.visible,opacity:+busMats[0].m.opacity.toFixed(2)},busCycle:+BUS_T.toFixed(2)});
+window.goTo=goTo;window.startTour=startTour;window.stopTour=stopTour;window.setBusT=(t)=>{cycT=t;busT=t%BUS_T;busPrevX=null;agents.forEach(a=>a.st.px=null);};
+window.state=()=>({cur,cam:camera.position.toArray().map(v=>+v.toFixed(2)),playing:tour.playing,paused:tour.paused,flying:!!camTween,bus:{t:+busT.toFixed(2),x:+bus.position.x.toFixed(1),visible:bus.visible,opacity:+busMats[0].m.opacity.toFixed(2)},busCycle:+BUS_T.toFixed(2),busArrives:+t2.toFixed(2),busDeparts:+t3.toFixed(2),people:agents.filter(a=>a.st.g.visible).length});
 
 // ----- render loop -----
 const _v=new THREE.Vector3();let T=0;
 function tick(dt){T+=dt;
   fans.forEach(f=>f.rotation.y+=dt*7);
   evapArrows.forEach(a=>{const f=(T*.22+a.ph)%1;a.g.position.y=a.y0+f*1.1;a.g.position.x=a.x0+Math.sin(T*1.6+a.ph*6.28)*.08;a.mat.opacity=.15+.85*Math.sin(f*Math.PI);});
-  tickBus(dt);
+  tickBus(dt);tickPeople(dt);tickPower();
   if(camTween){const c=camTween;c.t+=dt;const k=easeInOutCubic(Math.min(1,c.t/c.dur));camera.position.lerpVectors(c.p0,c.p1,k);controls.target.lerpVectors(c.t0,c.t1,k);if(k>=1)cancelFly();}
-  controls.update();clampTarget();
+  applyWheelOrbit(dt);controls.update();clampTarget();
   tickTour(dt);}
 function placePins(){HS.forEach((h,i)=>{const v=_v.set(...h).project(camera);const d=pins[i];
   if(!window._ui||v.z>1||Math.abs(v.x)>1.05||Math.abs(v.y)>1.05){d.style.visibility='hidden';return;}d.style.visibility='visible';
