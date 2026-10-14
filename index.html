@@ -10,10 +10,6 @@
   #c canvas:active{cursor:grabbing}
   .ui{position:absolute;z-index:5}
   button{font:inherit}
-  #title{top:18px;left:22px;background:rgba(255,255,255,.92);padding:10px 16px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
-  #title b{font-size:20px;color:#173a5e;display:block}
-  #title span{font-size:13px;color:#4a6175}
-  #title small{display:block;margin-top:6px;font-size:11.5px;color:#7a8a99}
   #tour{bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.95);padding:8px;border-radius:30px;box-shadow:0 2px 12px rgba(0,0,0,.15);white-space:nowrap}
   #tour .step{position:relative;overflow:hidden;display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:20px;font-size:13px;color:#445;font-weight:600;cursor:pointer;transition:background .2s,color .2s}
   #tour .step:hover{background:#e8eef4}
@@ -28,42 +24,40 @@
   #card{top:90px;right:22px;width:300px;background:rgba(255,255,255,.96);border-radius:14px;padding:16px 18px;box-shadow:0 4px 18px rgba(0,0,0,.18);display:none;border-top:6px solid #2e8b57;animation:cardIn .35s ease-out}
   @keyframes cardIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
   #card h3{margin:0 0 6px;font-size:17px;color:#173a5e}
-  #card .body{font-size:13.5px;line-height:1.45;color:#333}
-  #card ul{margin:6px 0 4px 0;padding-left:18px;font-size:13px;line-height:1.5}
+  #card .body{font-size:14px;line-height:1.45;color:#1d2733;font-weight:600}
+  #card ul{margin:6px 0 4px 0;padding-left:18px;font-size:13.5px;line-height:1.5;font-weight:600}
   #card .tag{display:inline-block;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;background:#eef3f0;margin-bottom:4px}
   .pin{position:absolute;z-index:4;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:#f2b632;color:#173a5e;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;transition:transform .15s,background .2s,color .2s}
   .pin:hover{transform:scale(1.18)}
   .pin.act{background:#173a5e;color:#fff;transform:scale(1.25)}
   #start{bottom:80px;left:50%;transform:translateX(-50%);border:0;background:#f2b632;color:#173a5e;font-weight:800;padding:12px 26px;border-radius:26px;font-size:15px;box-shadow:0 3px 12px rgba(0,0,0,.2);cursor:pointer;display:none;animation:pulse 2.4s ease-in-out infinite}
   #start:hover{background:#ffc43d}
+  #start.stop{background:rgba(255,255,255,.95);color:#173a5e;animation:none}
+  #start.stop:hover{background:#eef2f6}
   @keyframes pulse{0%,100%{box-shadow:0 3px 12px rgba(0,0,0,.2)}50%{box-shadow:0 3px 22px rgba(242,182,50,.75)}}
   #reset{bottom:18px;right:22px;border:0;background:rgba(255,255,255,.95);color:#173a5e;font-weight:700;font-size:13px;padding:10px 16px;border-radius:22px;box-shadow:0 2px 10px rgba(0,0,0,.12);cursor:pointer;transition:background .2s}
   #reset:hover{background:#eef2f6}
-  #qr{bottom:18px;left:22px;background:#fff;border-radius:10px;padding:8px;font-size:11px;color:#555;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.12)}
-  #qr img{display:block;width:120px;height:120px;margin:0 auto 4px}
-  #qr small{display:block;margin-top:2px;font-size:10px;color:#8a96a3}
-  /* phones (opened via the QR code): compact layout, no QR box */
+  #fs{bottom:64px;right:22px;border:0;background:rgba(255,255,255,.95);color:#173a5e;font-weight:700;font-size:13px;padding:10px 16px;border-radius:22px;box-shadow:0 2px 10px rgba(0,0,0,.12);cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:background .2s}
+  #fs:hover{background:#eef2f6}
+  #fs svg{width:14px;height:14px}
+  /* phones: compact layout */
   @media (max-width:720px){
-    #qr{display:none}
-    #title{top:12px;left:12px;right:12px;padding:8px 12px}
-    #title b{font-size:17px}
-    #title small{display:none}
-    #card{top:104px;left:12px;right:12px;width:auto}
+    #card{top:12px;left:12px;right:12px;width:auto}
     #tour{left:8px;right:8px;transform:none;justify-content:center;padding:6px;gap:4px}
     #tour .step{padding:6px 8px;font-size:12px}
     #tour .nav{width:30px;height:30px}
     #reset{bottom:68px;right:12px}
+    #fs{bottom:68px;left:12px;right:auto}
     #start{bottom:124px}
   }
 </style>
 <script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/addons/"}}</script>
 </head><body>
 <div id="c"></div>
-<div id="title" class="ui"><b>Journey of a Solar Panel</b><span>Biosolar roofs + Solar Cool Stops · NTU campus concept</span><small>Two-finger swipe or drag to orbit · pinch or scroll to zoom · click a numbered pin</small></div>
 <div id="card" class="ui"></div>
 <button id="start" class="ui">▶ Start the guided tour</button>
 <button id="reset" class="ui" title="Back to the overview (Esc)">⟲ Reset view</button>
-<div id="qr" class="ui"><img src="./assets/qr.svg" alt="QR code linking to this 3D model">Scan to open on your phone<small>sriman22-ui.github.io/cc6</small></div>
+<button id="fs" class="ui" title="Full screen (F)"></button>
 <div id="tour" class="ui"></div>
 <script type="module">
 import * as THREE from 'three';
@@ -384,7 +378,9 @@ function tickPeople(dt){for(const a of agents){const P=a.P,k=a.k,n=k.length,tau=
 
 // ---------- hotspots / UI ----------
 const $=id=>document.getElementById(id);
-const ICON={play:'<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg>',
+const ICON={expand:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+ shrink:'<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2v4H2M10 6V2h4M14 10h-4v4M2 10h4v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+ play:'<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg>',
  pause:'<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><rect x="3" y="2.5" width="3.5" height="11" rx=".6" fill="currentColor"/><rect x="9.5" y="2.5" width="3.5" height="11" rx=".6" fill="currentColor"/></svg>'};
 const HS=[[rcx,RY+6.3,-2],[sx,6.6,sz]];
 const pins=HS.map((p,i)=>{const d=document.createElement('div');d.className='pin';d.textContent=i+1;d.title='Go to stop '+(i+1);document.body.appendChild(d);return d;});
@@ -397,7 +393,7 @@ const CARDS={
 
 // ----- state -----
 let cur=0,camTween=null;
-const HOLD=8,TWEEN=1.2;
+const HOLD=16,OVERVIEW_HOLD=5,TWEEN=1.2;   // HOLD = seconds per stop = one full 360° orbit; OVERVIEW_HOLD = pause on the overview between loops (0 = none)
 const tour={playing:false,paused:false,hold:0};
 
 // ----- controls -----
@@ -419,18 +415,21 @@ function setStep(n){cur=n;
   const c=$('card');
   if(n&&CARDS[n]){const [col,tag,h,body]=CARDS[n];c.style.display='none';c.style.borderTopColor=col;c.innerHTML=`<span class="tag" style="color:${col}">${tag}</span><h3>${h}</h3><div class="body">${body}</div>`;void c.offsetWidth;c.style.display='block';}else c.style.display='none';
   refreshButtons();}
-function refreshButtons(){$('start').style.display=(cur===0&&!tour.playing)?'block':'none';
+function refreshButtons(){const s=$('start');s.style.display=(tour.playing||cur===0)?'block':'none';s.classList.toggle('stop',tour.playing);s.textContent=tour.playing?'■ Stop the guided tour':'▶ Start the guided tour';
   const b=$('play');b.classList.toggle('on',tour.playing);b.innerHTML=tour.playing&&!tour.paused?ICON.pause:ICON.play;
   b.title=tour.playing?(tour.paused?'Resume the guided tour (space)':'Pause the guided tour (space)'):'Play the guided tour (space)';}
 function goTo(n){setStep(n);const v=viewFor(n);flyTo(v.p,v.t);}
 
-// ----- guided tour -----
-function startTour(){tour.playing=true;tour.paused=false;tour.hold=0;goTo(cur>=1&&cur<NSTOPS?cur:1);refreshButtons();}
+// ----- guided tour: 1 → 2 → overview → 1 … until stopped; the camera circles each stop once (360°) while its card is up -----
+function startTour(){tour.playing=true;tour.paused=false;tour.hold=0;goTo(cur>=1&&cur<=NSTOPS?cur:1);refreshButtons();}
 function stopTour(){if(!tour.playing)return;tour.playing=false;tour.paused=false;document.querySelectorAll('#tour .step em').forEach(e=>e.style.width='0');refreshButtons();}
-function endTour(){stopTour();goTo(0);}
-function tickTour(dt){if(!tour.playing||tour.paused||camTween)return;tour.hold+=dt;
-  const act=document.querySelector('#tour .step.act em');if(act)act.style.width=(clamp(tour.hold/HOLD,0,1)*100)+'%';
-  if(tour.hold>=HOLD){tour.hold=0;if(cur>=NSTOPS)endTour();else goTo(cur+1);}}
+function tickTour(dt){if(!tour.playing||tour.paused||camTween)return;
+  const len=cur===0?OVERVIEW_HOLD:HOLD;
+  if(cur>=1&&cur<=NSTOPS){const a=Math.max(0,Math.min(dt,len-tour.hold))/len*Math.PI*2;   // orbit around the stop, exactly one turn per hold
+    _off.copy(camera.position).sub(controls.target);_sph.setFromVector3(_off);_sph.theta+=a;camera.position.copy(controls.target).add(_off.setFromSpherical(_sph));}
+  tour.hold+=dt;
+  const act=document.querySelector('#tour .step.act em');if(act)act.style.width=(clamp(tour.hold/len,0,1)*100)+'%';
+  if(tour.hold>=len){tour.hold=0;goTo(cur>=NSTOPS?(OVERVIEW_HOLD>0?0:1):cur+1);}}
 const userNav=fn=>{stopTour();fn();};
 const nextStop=()=>(cur+1)%(NSTOPS+1),prevStop=()=>(cur+NSTOPS)%(NSTOPS+1);
 
@@ -440,7 +439,7 @@ document.querySelectorAll('#tour .step').forEach(d=>d.addEventListener('click',(
 $('prev').addEventListener('click',()=>userNav(()=>goTo(prevStop())));
 $('next').addEventListener('click',()=>userNav(()=>goTo(nextStop())));
 $('play').addEventListener('click',()=>{if(tour.playing){tour.paused=!tour.paused;refreshButtons();}else startTour();});
-$('start').addEventListener('click',startTour);
+$('start').addEventListener('click',()=>tour.playing?stopTour():startTour());
 $('reset').addEventListener('click',()=>userNav(()=>goTo(0)));
 // any drag / swipe on the scene cancels an in-flight camera move and stops the auto tour
 renderer.domElement.addEventListener('pointerdown',()=>{cancelFly();stopTour();},{capture:true,passive:true});
@@ -456,9 +455,17 @@ function applyWheelOrbit(dt){if(Math.abs(wheelRot.theta)<1e-4&&Math.abs(wheelRot
   const k=Math.min(1,dt*10),dth=wheelRot.theta*k,dph=wheelRot.phi*k;wheelRot.theta-=dth;wheelRot.phi-=dph;
   _off.copy(camera.position).sub(controls.target);_sph.setFromVector3(_off);_sph.theta+=dth;_sph.phi=clamp(_sph.phi+dph,controls.minPolarAngle,controls.maxPolarAngle);
   camera.position.copy(controls.target).add(_off.setFromSpherical(_sph));}
+// ----- full screen (button or F key; Esc leaves full screen without resetting the view) -----
+const fsDoc=document.documentElement,fsReq=fsDoc.requestFullscreen||fsDoc.webkitRequestFullscreen,fsExit=document.exitFullscreen||document.webkitExitFullscreen;
+const fsOn=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+function toggleFS(){const r=fsOn()?fsExit.call(document):fsReq.call(fsDoc);if(r&&r.catch)r.catch(()=>{});}
+function refreshFS(){const on=fsOn();$('fs').innerHTML=(on?ICON.shrink:ICON.expand)+(on?'Exit full screen':'Full screen');$('fs').title=on?'Exit full screen (F)':'Full screen (F)';}
+if(fsReq&&fsExit){$('fs').addEventListener('click',toggleFS);['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,refreshFS));refreshFS();}
+else $('fs').style.display='none';                                 // e.g. iPhone Safari has no page full screen
 addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;
   if(e.key==='ArrowRight'){userNav(()=>goTo(nextStop()));}else if(e.key==='ArrowLeft'){userNav(()=>goTo(prevStop()));}
-  else if(e.key===' '){e.preventDefault();$('play').click();}else if(e.key==='Escape'||e.key==='Home'){userNav(()=>goTo(0));}
+  else if(e.key===' '){e.preventDefault();$('play').click();}else if((e.key==='Escape'&&!fsOn())||e.key==='Home'){userNav(()=>goTo(0));}
+  else if((e.key==='f'||e.key==='F')&&fsReq&&!e.ctrlKey&&!e.metaKey&&!e.altKey){toggleFS();}
   else if(/^[0-9]$/.test(e.key)&&+e.key<=NSTOPS){userNav(()=>goTo(+e.key));}});
 addEventListener('resize',()=>{W=innerWidth;H=innerHeight;camera.aspect=W/H;camera.updateProjectionMatrix();renderer.setSize(W,H);});
 

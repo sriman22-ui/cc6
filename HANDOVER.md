@@ -6,11 +6,10 @@ Loop bus stop rebuilt as the Solar Cool Stop. Built for a laptop at the booth:
 mouse / trackpad drag to orbit, scroll to zoom, click to explore.
 
 ## Live site + QR code
-- Live URL: https://sriman22-ui.github.io/cc6/ (GitHub Pages, deployed by .github/workflows/pages.yml)
-- QR code for that URL: assets/qr.png (1184 px, for the poster / slides) and assets/qr.svg (shown bottom-left on the page itself, hidden on screens narrower than 720 px because you are already on the phone)
-- Every push to the default branch or to claude/happy-mayer-nhil7q redeploys the site (about a minute). The workflow stages only index.html, views.json, assets/ and vendor/.
-- One-time setup by the repo owner: GitHub repo → Settings → Pages → Build and deployment → Source: "GitHub Actions". Until that is set, the workflow fails at "Setup Pages".
-- If the URL ever changes: run `pip install segno && python3 qr.py https://new-url/` (or `npm run qr` after editing LIVE_URL in qr.py) and update the caption text in index.html (search `id="qr"`).
+- Live URL (once deployed): https://sriman22-ui.github.io/cc6/ (GitHub Pages, deployed by .github/workflows/pages.yml)
+- QR code for that URL, for the poster / slides: assets/qr.png (1184 px) and assets/qr.svg. The page itself no longer shows a QR box.
+- The workflow stages only index.html, views.json, assets/ and vendor/. Pages is enabled on the repo (Source: GitHub Actions), but its github-pages environment only accepts deploys from the default branch, so either merge into the default branch or add the working branch under Settings → Environments → github-pages.
+- If the URL ever changes: `pip install segno && python3 qr.py https://new-url/` (or `npm run qr` after editing LIVE_URL in qr.py).
 
 ## Files
 - index.html – the whole scene + UI (Three.js 0.160, plain JS, no build step)
@@ -22,7 +21,7 @@ mouse / trackpad drag to orbit, scroll to zoom, click to explore.
 - comp3.py – builds the photo-vs-3D comparison images (Pillow)
 - reference-photos/ – EEE building, NTU rooftop solar, Campus Loop bus stop, campus bus
 - assets/ntu-logo.png – NTU logo (trimmed), used on the bus
-- assets/qr.svg, assets/qr.png – QR code pointing at the live site
+- assets/qr.svg, assets/qr.png – QR code pointing at the live site (for print, not shown on the page)
 
 ## Run locally
     npm start              # python3 -m http.server 8765 (no install needed, three is vendored)
@@ -38,13 +37,14 @@ If views.json cannot be loaded the page falls back to an inline copy of the view
 - Trackpad friendly: two-finger swipe orbits, pinch zooms; click-drag orbits and a mouse wheel zooms too
 - Hotspot pins 1–2 and the tour-bar steps are clickable: 1.2 s eased camera tween to that stop's view from views.json, info card appears
 - ‹ › Prev / Next buttons (cycle overview → 1 Biosolar roof → 2 Solar Cool Stop → overview)
-- ▶ guided tour: 8 s per stop, pause/resume button; any drag, scroll or click stops it
+- ▶ guided tour: loops 1 Biosolar roof → 2 Solar Cool Stop → overview → 1 … until stopped. At each stop the camera makes one full 360° circle around it (HOLD seconds) with the info card up, then pauses OVERVIEW_HOLD seconds on the overview. The big button turns into ■ Stop while it plays; the tour-bar ▶/❚❚ button pauses/resumes; any drag, scroll, pin or step click also stops it
 - Ceiling fans spin, evapotranspiration arrows rise and drift
 - ⟲ Reset view returns to the overview
+- ⛶ Full screen button (above Reset, or the F key) puts the page in browser full screen on any laptop; Esc or the button leaves it (hidden on iPhone, which has no page full screen)
 - Campus Loop bus (NTU blue shuttle with the NTU logo, from reference-photos/campus-bus.png) drives in, opens its door, waits 4 s at the shelter and drives off; one pass every ~18 s
 - Ten students in the "Student Vol 01" outfits: they walk to the stop, wait (standing and on the bench), board, alight and walk away, all in sync with the bus
 - Solar Cool Stop appliances are labelled (reused panels, ceiling fans, LED lighting, phone charging, battery) with wiring and moving energy pulses from the canopy
-- Keyboard: ← → stops, 1–2 jump to a stop, space play/pause, Esc or Home reset
+- Keyboard: ← → stops, 1–2 jump to a stop, space play/pause, F full screen, Esc or Home reset (Esc only leaves full screen when in it)
 
 ## Key places in index.html
 - Camera views + which view each stop uses: search "STOP_VIEW"
@@ -56,8 +56,8 @@ If views.json cannot be loaded the page falls back to an inline copy of the view
 - Students: search "students" (OUTFITS = colours per model, agents = one schedule per student built with sched(); times are relative to ARR / DEP, the bus arrival and departure)
 - Appliance labels + pulses: search "what the canopy panels power" (POWER = labels, ROUTES = wiring)
 - Info-card text: CARDS; tour labels: steps; hotspot positions: HS
-- Tour / tween / toggle logic: search "state", "guided tour", "render loop"
-- Timings: HOLD (seconds per stop), TWEEN (camera move), BUS_V / BUS_WAIT / BUS_GAP (bus cycle), WALK (student walking speed)
+- Tour / tween / toggle logic: search "state", "guided tour" (tickTour does the orbit), "render loop"
+- Timings: HOLD (seconds per stop = one 360° orbit), OVERVIEW_HOLD (pause on the overview between loops, 0 skips it), TWEEN (camera move), BUS_V / BUS_WAIT / BUS_GAP (bus cycle), WALK (student walking speed)
 
 ## window API (used by shoot2.mjs, handy from the console)
 setStep(n), setCam(p,t), setUI(bool), showPins(bool), setMode() (no-op, kept for old scripts),
