@@ -1,0 +1,48 @@
+# Deploys the Solar Journey 3D page to GitHub Pages.
+# Live URL: https://sriman22-ui.github.io/cc6/  (the QR code in assets/ points here)
+#
+# One-time setup by the repo owner: Settings → Pages → Build and deployment →
+# Source: "GitHub Actions". After that, every push to the branches below redeploys.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - claude/compassionate-hawking-6havhc   # default branch
+      - claude/happy-mayer-nhil7q
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Stage the site (only the files the page needs)
+        run: |
+          mkdir -p _site
+          cp -r index.html views.json assets vendor _site/
+          ls -R _site
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v5   # uploads _site/ by default
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5

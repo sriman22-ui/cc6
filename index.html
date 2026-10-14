@@ -40,16 +40,30 @@
   #reset{bottom:18px;right:22px;border:0;background:rgba(255,255,255,.95);color:#173a5e;font-weight:700;font-size:13px;padding:10px 16px;border-radius:22px;box-shadow:0 2px 10px rgba(0,0,0,.12);cursor:pointer;transition:background .2s}
   #reset:hover{background:#eef2f6}
   #qr{bottom:18px;left:22px;background:#fff;border-radius:10px;padding:8px;font-size:11px;color:#555;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.12)}
-  #qr .box{width:64px;height:64px;background:repeating-conic-gradient(#173a5e 0 25%,#fff 0 50%) 0 0/12px 12px;margin:0 auto 4px;border:4px solid #fff;outline:2px solid #173a5e}
+  #qr img{display:block;width:120px;height:120px;margin:0 auto 4px}
+  #qr small{display:block;margin-top:2px;font-size:10px;color:#8a96a3}
+  /* phones (opened via the QR code): compact layout, no QR box */
+  @media (max-width:720px){
+    #qr{display:none}
+    #title{top:12px;left:12px;right:12px;padding:8px 12px}
+    #title b{font-size:17px}
+    #title small{display:none}
+    #card{top:104px;left:12px;right:12px;width:auto}
+    #tour{left:8px;right:8px;transform:none;justify-content:center;padding:6px;gap:4px}
+    #tour .step{padding:6px 8px;font-size:12px}
+    #tour .nav{width:30px;height:30px}
+    #reset{bottom:68px;right:12px}
+    #start{bottom:124px}
+  }
 </style>
-<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script>
+<script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/addons/"}}</script>
 </head><body>
 <div id="c"></div>
 <div id="title" class="ui"><b>Journey of a Solar Panel</b><span>Biosolar roofs + Solar Cool Stops · NTU campus concept</span><small>Two-finger swipe or drag to orbit · pinch or scroll to zoom · click a numbered pin</small></div>
 <div id="card" class="ui"></div>
 <button id="start" class="ui">▶ Start the guided tour</button>
 <button id="reset" class="ui" title="Back to the overview (Esc)">⟲ Reset view</button>
-<div id="qr" class="ui"><div class="box"></div>Open on your phone</div>
+<div id="qr" class="ui"><img src="./assets/qr.svg" alt="QR code linking to this 3D model">Scan to open on your phone<small>sriman22-ui.github.io/cc6</small></div>
 <div id="tour" class="ui"></div>
 <script type="module">
 import * as THREE from 'three';

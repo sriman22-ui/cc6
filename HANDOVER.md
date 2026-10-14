@@ -5,20 +5,32 @@ fully biosolar roof (panels raised above low-growing plants) and the Campus
 Loop bus stop rebuilt as the Solar Cool Stop. Built for a laptop at the booth:
 mouse / trackpad drag to orbit, scroll to zoom, click to explore.
 
+## Live site + QR code
+- Live URL: https://sriman22-ui.github.io/cc6/ (GitHub Pages, deployed by .github/workflows/pages.yml)
+- QR code for that URL: assets/qr.png (1184 px, for the poster / slides) and assets/qr.svg (shown bottom-left on the page itself, hidden on screens narrower than 720 px because you are already on the phone)
+- Every push to the default branch or to claude/happy-mayer-nhil7q redeploys the site (about a minute). The workflow stages only index.html, views.json, assets/ and vendor/.
+- One-time setup by the repo owner: GitHub repo → Settings → Pages → Build and deployment → Source: "GitHub Actions". Until that is set, the workflow fails at "Setup Pages".
+- If the URL ever changes: run `pip install segno && python3 qr.py https://new-url/` (or `npm run qr` after editing LIVE_URL in qr.py) and update the caption text in index.html (search `id="qr"`).
+
 ## Files
 - index.html – the whole scene + UI (Three.js 0.160, plain JS, no build step)
+- vendor/three/ – Three.js 0.160.1 (three.module.min.js + addons/controls/OrbitControls.js) copied from node_modules so the page works offline and on GitHub Pages; `npm run vendor` refreshes it after `npm install three@x`
+- qr.py – regenerates assets/qr.svg + assets/qr.png for the live URL (needs `pip install segno`)
+- .github/workflows/pages.yml – GitHub Pages deployment
 - views.json – the agreed camera views (overview, stop 1, stop 2, under canopy) and the clip script
 - shoot2.mjs – Playwright script that renders stills / tour frames (still works)
 - comp3.py – builds the photo-vs-3D comparison images (Pillow)
 - reference-photos/ – EEE building, NTU rooftop solar, Campus Loop bus stop, campus bus
 - assets/ntu-logo.png – NTU logo (trimmed), used on the bus
+- assets/qr.svg, assets/qr.png – QR code pointing at the live site
 
 ## Run locally
-    npm install            # three + playwright
-    npm start              # python3 -m http.server 8765
+    npm start              # python3 -m http.server 8765 (no install needed, three is vendored)
     open http://localhost:8765/index.html
+    npm install            # only needed for the Playwright stills / clip scripts
 
 The page must be served over http (the importmap and views.json fetch need it).
+No internet connection is needed at the booth: Three.js is served from vendor/.
 If views.json cannot be loaded the page falls back to an inline copy of the views.
 
 ## What's interactive
